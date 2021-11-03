@@ -6,9 +6,9 @@ class Node:
 
 class StackFrontier:
     def __init__(self):
-        self.frontier = []
+        self.frontier: list[Node] = []
 
-    def add(self, node):
+    def add(self, node: Node):
         self.frontier.append(node)
 
     def contains_state(self, state):

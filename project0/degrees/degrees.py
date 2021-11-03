@@ -1,19 +1,22 @@
+from __future__ import annotations
+
 import csv
 import sys
+from typing import Optional
 
-from util import Node, StackFrontier, QueueFrontier
+from util import Node, QueueFrontier, StackFrontier
 
 # Maps names to a set of corresponding person_ids
-names = {}
+names: dict[str, set[str]] = {}
 
 # Maps person_ids to a dictionary of: name, birth, movies (a set of movie_ids)
-people = {}
+people: dict[str, dict[str, str | set[str]]] = {}
 
 # Maps movie_ids to a dictionary of: title, year, stars (a set of person_ids)
-movies = {}
+movies: dict[str, dict[str, str  | set[str]]] = {}
 
 
-def load_data(directory):
+def load_data(directory: str):
     """
     Load data from CSV files into memory.
     """
@@ -55,7 +58,7 @@ def load_data(directory):
 def main():
     if len(sys.argv) > 2:
         sys.exit("Usage: python degrees.py [directory]")
-    directory = sys.argv[1] if len(sys.argv) == 2 else "large"
+    directory: str = sys.argv[1] if len(sys.argv) == 2 else "large"
 
     # Load data from files into memory
     print("Loading data...")
@@ -84,7 +87,7 @@ def main():
             print(f"{i + 1}: {person1} and {person2} starred in {movie}")
 
 
-def shortest_path(source, target):
+def shortest_path(source: str, target: str):
     """
     Returns the shortest list of (movie_id, person_id) pairs
     that connect the source to the target.
@@ -95,7 +98,7 @@ def shortest_path(source, target):
     # Initialize frontier (with a Queue for BFS)
     frontier = QueueFrontier()
     # Initialize explored set for circular path avoidance
-    explored = set()
+    explored: set[Node] = set()
 
     # Initialize first node, add to frontier
     cnode = Node(state=(None, source), parent=None)
@@ -127,7 +130,7 @@ def shortest_path(source, target):
         explored.add(cnode.state)
 
 
-def person_id_for_name(name):
+def person_id_for_name(name: str) -> Optional[str]:
     """
     Returns the IMDB id for a person's name,
     resolving ambiguities as needed.
@@ -139,9 +142,9 @@ def person_id_for_name(name):
         print(f"Which '{name}'?")
         for person_id in person_ids:
             person = people[person_id]
-            name = person["name"]
+            its_name = person["name"]
             birth = person["birth"]
-            print(f"ID: {person_id}, Name: {name}, Birth: {birth}")
+            print(f"ID: {person_id}, Name: {its_name}, Birth: {birth}")
         try:
             person_id = input("Intended Person ID: ")
             if person_id in person_ids:
@@ -153,13 +156,13 @@ def person_id_for_name(name):
         return person_ids[0]
 
 
-def neighbors_for_person(person_id):
+def neighbors_for_person(person_id: str) -> set[tuple[str, str]]:
     """
     Returns (movie_id, person_id) pairs for people
     who starred with a given person.
     """
     movie_ids = people[person_id]["movies"]
-    neighbors = set()
+    neighbors: set[tuple[str, str]] = set()
     for movie_id in movie_ids:
         for person_id in movies[movie_id]["stars"]:
             neighbors.add((movie_id, person_id))
